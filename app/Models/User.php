@@ -45,4 +45,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function memos()
+    {
+        return $this->hasMany(Memo::class);
+    }
 }

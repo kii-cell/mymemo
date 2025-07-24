@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Memo;
 use Illuminate\Support\Facades\Auth;
+use Illminate\Support\Str;
 
 class MemoController extends Controller
 {
@@ -13,8 +14,11 @@ class MemoController extends Controller
      */
     public function index()
     {
-        $memos = Memo::where('user_id',Auth::id())->get();
-        return view('memos.index',compact('memos'));
+        $memos = Memo::where('user_id', Auth::id())
+            ->latest()
+            ->paginate(6);
+
+        return view('memos.index', compact('memos'));
     }
 
     /**
@@ -38,10 +42,10 @@ class MemoController extends Controller
         $memo = new Memo();
         $memo->title = $validated['title'];
         $memo->content = $validated['content'];
-        $memo->user_id = auth()->id();
+        $memo->user_id = Auth::id();
         $memo->save();
 
-        return redirect9()->route('memos.index')->with('success','メモを作成しました');
+        return redirect()->route('memos.index')->with('success', 'メモを作成しました');
     }
 
     /**
@@ -49,7 +53,8 @@ class MemoController extends Controller
      */
     public function show(string $id)
     {
-        //  
+        $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
+        return view('memos.show', compact('memo'));
     }
 
     /**
@@ -73,6 +78,9 @@ class MemoController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
+        $memo->delete();
+
+        return redirect()->route('memos.index')->with('success', 'メモを削除しました');
     }
 }
