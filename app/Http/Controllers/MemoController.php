@@ -62,7 +62,8 @@ class MemoController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
+        return view('memos.edit', compact('memo'));
     }
 
     /**
@@ -70,7 +71,17 @@ class MemoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'content' => 'required|string',
+        ]);
+
+        $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
+        $memo->title = $validated['title'];
+        $memo->content = $validated['content'];
+        $memo->save();
+
+        return redirect()->route('memos.show', $memo->id)->with('success', 'メモを更新しました');
     }
 
     /**
