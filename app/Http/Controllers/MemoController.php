@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Memo;
 use Illuminate\Support\Facades\Auth;
 use Illminate\Support\Str;
+use App\Models\Tag;
 
 class MemoController extends Controller
 {
@@ -34,16 +35,36 @@ class MemoController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|',
-            'content' => 'required',
+        $request->validate(
+            [
+                'title' => 'required|string|max:50',
+                'content' => 'required|string|max:1000',
+                'tags' => 'nullable|string',
+            ],
+            [
+                'title.required' => 'タイトルは必須です',
+                'title.max' => 'タイトルは50文字以内で入力してください',
+                'content.required' => '内容は必須です',
+                'content.max' => '内容は1000文字以内で入力してください',
+            ]
+        );
+
+        $memo = Memo::create([
+            'title' => $request->title,
+            'content' => $request->content,
+            'user_id' => Auth::id(),
         ]);
 
-        $memo = new Memo();
-        $memo->title = $validated['title'];
-        $memo->content = $validated['content'];
-        $memo->user_id = Auth::id();
-        $memo->save();
+        if (!empty($request->tags)) {
+            $tagNames = array_map('trim', explode(',', $request->tags));
+            $tagId = [];
+            foreach ($tagNames as $name) {
+                if ($name === '') continue;
+                $tag = Tag::firstOrCreate(['name' => $name]);
+                $tagId[] = $tag->id;
+            }
+            $memo->tags()->sync($tagId);
+        }
 
         return redirect()->route('memos.index')->with('success', 'メモを作成しました');
     }
@@ -71,15 +92,32 @@ class MemoController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'content' => 'required|string',
+        $request->validate([
+            'title' => 'required|string|max:50',
+            'content' => 'required|string|max:1000',
+            'tags' => 'nullable|string',
+        ], [
+            'title.required' => 'タイトルは必須です',
+            'title.max' => 'タイトルは50文字以内で入力してください',
+            'content.required' => '内容は必須です',
+            'content.max' => '内容は1000文字以内で入力してください',
         ]);
 
         $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
-        $memo->title = $validated['title'];
-        $memo->content = $validated['content'];
-        $memo->save();
+        $memo->update($request->only(['title', 'content']));
+
+        if (!empty($request->tags)) {
+            $tagNames = array_map('trim', explode(',', $request->tags));
+            $tagId = [];
+            foreach ($tagNames as $name) {
+                if ($name === '') continue;
+                $tag = Tag::firstOrCreate(['name' => $name]);
+                $tagId[] = $tag->id;
+            }
+            $memo->tags()->sync($tagId);
+        } else {
+            $memo->tags()->detach();
+        }
 
         return redirect()->route('memos.show', $memo->id)->with('success', 'メモを更新しました');
     }

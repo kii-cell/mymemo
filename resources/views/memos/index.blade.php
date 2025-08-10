@@ -25,6 +25,11 @@
                             <p class="card-text text-muted">
                                 {{ Str::limit($memo->content, 100) }}
                             </p>
+                            <div>
+                                @foreach ($memo->tags as $tag)
+                                    <span class="badge bg-primary">{{ $tag->name }}</span>
+                                @endforeach
+                            </div>
                         </div>
                         <div class="card-footer d-flex justify-content-between align-items-center">
                             <small class="text-muted">{{ $memo->created_at->format('Y年m月d日 H:i') }}</small>

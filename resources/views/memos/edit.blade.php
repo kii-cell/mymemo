@@ -29,6 +29,15 @@
                 <textarea id="content" name="content" class="form-control" rows="6">{{ old('content', $memo->content) }}</textarea>
             </div>
 
+            <div class="mb-3">
+                <label for="tags" class="form-label">タグ </label>
+                <input type="text" id="tags" name="tags" class="form-control"
+                    value="{{ old('tags', isset($memo) ? $memo->tags->pluck('name')->implode(',') : '') }}">
+                @error('tags')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
+            </div>
+
             <div class="d-flex justify-content-between">
                 <a href="{{ route('memos.show', $memo->id) }}" class="btn btn-secondary">キャンセル</a>
                 <button type="submit" class="btn btn-primary">更新</button>

@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\controllers\MemoController;
+use App\Http\Controllers\MemoController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -18,7 +18,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 Route::middleware('auth')->group(function () {
-Route::resource('memos', MemoController::class);
+    Route::resource('memos', MemoController::class);
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

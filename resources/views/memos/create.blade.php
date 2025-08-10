@@ -20,12 +20,21 @@
             <div class="mb-3">
                 <label for="title" class="form-label">タイトル <span class="text-danger">*</span></label>
                 <input type="text" id="title" name="title" class="form-control" value="{{ old('title') }}"
-                    required maxlength="255" autofocus>
+                    required maxlength="50" autofocus>
             </div>
 
             <div class="mb-3">
                 <label for="content" class="form-label">内容 <span class="text-danger">*</span></label>
                 <textarea id="content" name="content" class="form-control" rows="6" required>{{ old('content') }}</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="tags" class="form-label">タグ </label>
+                <input type="text" id="tags" name="tags" class="form-control"
+                    value="{{ old('tags', isset($memo) ? $memo->tags->pluck('name')->implode(',') : '') }}">
+                @error('tags')
+                    <div class="text-danger">{{ $message }}</div>
+                @enderror
             </div>
 
             <button type="submit" class="btn btn-primary">保存する</button>
