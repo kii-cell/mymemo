@@ -37,6 +37,12 @@
                     <li class="nav-item me-2">
                         <a class="nav-link" href="{{ route('memos.create') }}"><i class="fas fa-plus"></i> メモ作成</a>
                     </li>
+                    <li class="nav-item me-2">
+                        <a class="nav-link" href="{{ route('memos.trash') }}"><i class="fas fa-trash-alt"></i> ゴミ箱</a>
+                    </li>
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
                     @auth
                         <li class="nav-item me-3">
                             <span class="nav-link text-white">こんにちは,{{ Auth::user()->name }}さん</span>

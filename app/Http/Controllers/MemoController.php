@@ -13,13 +13,63 @@ class MemoController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $memos = Memo::where('user_id', Auth::id())
+        $keyword = $request->input('keyword');
+
+        $query = Memo::where('user_id', Auth::id());
+
+        if ($keyword) {
+            //$keyword = $request->keyword;
+            $query->where(function ($q) use ($keyword) {
+                $q->where('title', 'like', "%{$keyword}%")
+                    ->orWhere('content', 'like', "%{$keyword}%")
+                    ->orWhereHas('tags', function ($tagQuery) use ($keyword) {
+                        $tagQuery->where('name', 'like', "%{$keyword}%");
+                    });
+            });
+        }
+
+        $memos = $query->latest()->paginate(6);
+
+        return view('memos.index', compact('memos', 'keyword'));
+    }
+
+    //ゴミ箱
+    public function trash()
+    {
+        $memos = Memo::onlyTrashed()
+            ->where('user_id', Auth::id())
             ->latest()
             ->paginate(6);
+        return view('memos.trash', compact('memos'));
+    }
 
-        return view('memos.index', compact('memos'));
+    //論理削除
+    public function destroy(string $id)
+    {
+        $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
+        $memo->delete();
+
+        return redirect()->route('memos.index')->with('success', 'メモを削除しました');
+    }
+
+    //復元
+    public function restore(string $id)
+    {
+        $memo = Memo::onlyTrashed()->where('user_id', Auth::id())->findOrFail($id);
+        $memo->restore();
+
+        return redirect()->route('memos.trash')->with('success', 'メモを復元しました');
+    }
+
+    //完全削除
+    public function forceDelete(string $id)
+    {
+        $memo = Memo::onlyTrashed()->where('user_id', Auth::id())->findOrFail($id);
+        $memo->forceDelete();
+
+        return redirect()->route('memos.trash')->with('success', 'メモを完全に削除しました');
     }
 
     /**
@@ -125,11 +175,4 @@ class MemoController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        $memo = Memo::where('user_id', Auth::id())->findOrFail($id);
-        $memo->delete();
-
-        return redirect()->route('memos.index')->with('success', 'メモを削除しました');
-    }
 }

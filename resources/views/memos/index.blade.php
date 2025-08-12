@@ -1,3 +1,13 @@
+@php
+    function highlight($text, $keyword)
+    {
+        if (!$keyword) {
+            return e($text);
+        }
+        return preg_replace('/(' . preg_quote($keyword, '/') . ')/i', '<mark>$1</mark>', e($text));
+    }
+@endphp
+
 @extends('layouts.memosApp')
 
 @section('content')
@@ -9,11 +19,18 @@
                 {{ session('success') }}
             </div>
         @endif
-
-        <div class="mb-3 text-end">
-            <a href="{{ route('memos.create') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> メモ作成
-            </a>
+        <!-- 検索フォーム -->
+        <div class="mb-4 d-flex justify-content-between align-items-center">
+            <form action="{{ route('memos.index') }}" method="GET" class="d-flex flex-grow-1 me-3" role="search">
+                <input type="text" name="keyword" class="form-control" placeholder="キーワードで検索"
+                    value="{{ request('keyword') }}">
+                <button type="submit" class="btn btn-success ms-2">検索</button>
+            </form>
+            @if ($memos->count() > 0)
+                <a href="{{ route('memos.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> メモ作成
+                </a>
+            @endif
         </div>
 
         <div class="row">
@@ -21,13 +38,19 @@
                 <div class="col-md-6 col-lg-4 mb-4">
                     <div class="card h-100 shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">{{ $memo->title }}</h5>
+                            <h5 class="card-title">{!! highlight($memo->title, $keyword) !!}</h5>
                             <p class="card-text text-muted">
-                                {{ Str::limit($memo->content, 100) }}
+                                {!! highlight(Str::limit($memo->content, 100), $keyword) !!}
                             </p>
                             <div>
                                 @foreach ($memo->tags as $tag)
-                                    <span class="badge bg-primary">{{ $tag->name }}</span>
+                                    <span class="badge bg-primary">
+                                        @if ($keyword && stripos($tag->name, $keyword) !== false)
+                                            #{!! preg_replace('/(' . preg_quote($keyword, '/') . ')/i', '<mark>$1</mark>', e($tag->name)) !!}
+                                        @else
+                                            #{{ $tag->name }}
+                                        @endif
+                                    </span>
                                 @endforeach
                             </div>
                         </div>
@@ -38,12 +61,19 @@
                     </div>
                 </div>
             @empty
-                <p>メモがありません</p>
+                <div class="alert alert-warning w-100 text-center">
+                    該当するメモが見つかりませんでした
+                </div>
+                <div class="text-center my-4">
+                    <a href="{{ route('memos.create') }}" class="btn btn-lg btn-primary">
+                        <i class="fas fa-plus"></i> 新規メモを作成する
+                    </a>
+                </div>
             @endforelse
         </div>
 
         <div class="mt-4">
-            {{ $memos->links() }}
+            {{ $memos->appends(request()->query())->links() }}
         </div>
     </div>
 @endsection
