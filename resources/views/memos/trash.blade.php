@@ -2,7 +2,7 @@
 
 @section('content')
     <div class="container">
-        <h1 class="mb-4">🗑️ ゴミ箱 - 削除済みメモ一覧</h1>
+        <h1 class="mb-4">🗑️ ゴミ箱</h1>
 
         @if (session('success'))
             <div class="alert alert-success">
@@ -17,15 +17,20 @@
                 @foreach ($memos as $memo)
                     <div class="col-md-6 col-lg-4 mb-4">
                         <div class="card shadow-sm h-100">
-                            <div class="card-body">
+                            <div class="card-body d-flex flex-column justify-content-between">
                                 <h5 class="card-title">{{ $memo->title }}</h5>
-                                <p class="card-text text-muted" style="white-space: pre-wrap;">
+                                <p class="card-text text-muted mb-2">
                                     {{ Str::limit($memo->content, 150) }}
                                 </p>
+                                <div class="mb-3">
+                                    @foreach ($memo->tags as $tag)
+                                        <span class="badge bg-primary me-1 mb-1">#{{ $tag->name }}</span>
+                                    @endforeach
+                                </div>
                             </div>
-                            <div class="card-footer d-flex justify-content-between align-items-center">
+                            <div class="card-footer d-flex flex-wrap justify-content-between align-items-center gap-2">
                                 <small class="text-muted">削除日時: {{ $memo->deleted_at->format('Y年m月d日 H:i') }}</small>
-                                <div>
+                                <div class="d-flex flex-wrap gap-2">
                                     <form action="{{ route('memos.restore', $memo->id) }}" method="POST"
                                         style="display: inline;">
                                         @csrf

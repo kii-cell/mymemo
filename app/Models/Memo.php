@@ -14,6 +14,7 @@ class Memo extends Model
         'content',
         'user_id',
         'tags',
+        'pinned',
     ];
 
     use HasFactory;

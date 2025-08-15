@@ -17,6 +17,18 @@
         .navbar-brand {
             font-weight: bold;
         }
+
+        .pin-icon {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+
+            font-size: 1.2rem;
+        }
+
+        .card {
+            position: relative;
+        }
     </style>
 </head>
 

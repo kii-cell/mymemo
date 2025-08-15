@@ -8,7 +8,7 @@
                 <p class="card-text mt-3" style="white-space: pre-wrap;">{{ $memo->content }}</p>
                 <div class="mb-3">
                     @foreach ($memo->tags as $tag)
-                        <span class="badge bg-primary me-1 mb-1">{{ $tag->name }}</span>
+                        <span class="badge bg-primary me-1 mb-1">#{{ $tag->name }}</span>
                     @endforeach
                 </div>
             </div>

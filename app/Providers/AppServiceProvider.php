@@ -22,4 +22,8 @@ class AppServiceProvider extends ServiceProvider
     {
         view()->share('Str', new Str());
     }
+
+    protected $policies = [
+        \App\Models\Memo::class => \App\Policies\MemoPolicy::class,
+    ];
 }

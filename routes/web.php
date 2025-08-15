@@ -24,6 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::put('memos/{id}/restore', [MemoController::class, 'restore'])->name('memos.restore');
     //完全削除
     Route::delete('memos/{id}/force-delete', [MemoController::class, 'forceDelete'])->name('memos.forceDelete');
+    //ピン留め
+    Route::post('memos/{memo}/toggle-pin', [MemoController::class, 'togglePin'])->name('memos.togglePin');
 
     Route::resource('memos', MemoController::class);
 });

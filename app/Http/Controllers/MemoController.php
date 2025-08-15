@@ -5,8 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Memo;
 use Illuminate\Support\Facades\Auth;
-use Illminate\Support\Str;
+use Illuminate\Support\Str;
 use App\Models\Tag;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class MemoController extends Controller
 {
@@ -16,7 +17,8 @@ class MemoController extends Controller
     public function index(Request $request)
     {
         $keyword = $request->input('keyword');
-
+        $tagId = $request->input('tag');
+        $sort = $request->input('sort', 'latest');
         $query = Memo::where('user_id', Auth::id());
 
         if ($keyword) {
@@ -24,15 +26,34 @@ class MemoController extends Controller
             $query->where(function ($q) use ($keyword) {
                 $q->where('title', 'like', "%{$keyword}%")
                     ->orWhere('content', 'like', "%{$keyword}%")
-                    ->orWhereHas('tags', function ($tagQuery) use ($keyword) {
-                        $tagQuery->where('name', 'like', "%{$keyword}%");
+                    ->orWhereHas('tags', function ($q2) use ($keyword) {
+                        $q2->where('name', 'like', "%{$keyword}%");
                     });
             });
         }
 
-        $memos = $query->latest()->paginate(6);
+        if ($tagId) {
+            $query->whereHas('tags', function ($q) use ($tagId) {
+                $q->where('tag_id', $tagId);
+            });
+        }
+        $query->orderByDesc('pinned');
+        switch ($sort) {
+            case 'oldest':
+                $query->orderBy('created_at', 'asc');
+                break;
+            case 'title':
+                $query->orderBy('title', 'asc');
+                break;
+            default:
+                $query->orderBy('created_at', 'desc');
+        }
 
-        return view('memos.index', compact('memos', 'keyword'));
+        $memos = $query->paginate(6);
+
+        $activeTag = $tagId ? \App\Models\Tag::find($tagId) : null;
+
+        return view('memos.index', compact('memos', 'keyword', 'sort', 'activeTag'));
     }
 
     //ゴミ箱
@@ -70,6 +91,20 @@ class MemoController extends Controller
         $memo->forceDelete();
 
         return redirect()->route('memos.trash')->with('success', 'メモを完全に削除しました');
+    }
+
+    use AuthorizesRequests;
+
+    //ピン留め
+    public function togglePin(Memo $memo)
+    {
+        $this->authorize('update', $memo);
+        $memo->pinned = !$memo->pinned;
+        $memo->save();
+
+        $message = $memo->pinned ? 'ピン留めしました' : 'ピン留め解除しました';
+
+        return redirect()->back()->with('success', $message);
     }
 
     /**
