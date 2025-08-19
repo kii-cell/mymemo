@@ -36,7 +36,10 @@ Laravel Breezeをベースにしたログイン機能付きメモ管理アプリ
 
 📷 画面キャプチャ
 
-※後日追加予定
+![メモ一覧](https://github.com/user-attachments/assets/af92bbe8-3741-4896-9657-9812c7a8d89b)
+![タグ検索](https://github.com/user-attachments/assets/cfce3917-1ce9-4c47-b30f-70af948efdf2)
+![ピン留め](https://github.com/user-attachments/assets/1181d6ac-8eaf-4b38-b7f2-2c3faea7c85b)
+![ゴミ箱](https://github.com/user-attachments/assets/18f10b66-9b7a-4396-bbc4-1e37047759a1)
 
 ---
 
